@@ -24,20 +24,17 @@ const userSchema = new Schema({
     pw: String
 });
 const urlSchema = new Schema({
-    shortened: String,
+    short: String,
     url: String,
     author: String,
 });
 
 const User = mongoose.model('user', userSchema);
-const SURL = mongoose.model('surl', userSchema);
+const SURL = mongoose.model('surl', urlSchema);
 
 
 
 
-let getURLFromCode = code => {
-//TODO: searching algorithm
-};
 
 
 
@@ -47,22 +44,108 @@ app.get('/', (req, res) => {
     res.send('Hello world!');
 });
 
-//TODO : 데이터베이스 접근, id값에 따른 주소 검색, redirect
-app.get('/surl/:id', (req, res) => {
-    //res.send(getURLFromCode(req.params.id));
-/*    setTimeout(() => {
-        res.json({result:1, url:"https://naver.com"});
-    }, 2000);*/
+
+app.get('/surl/:short', (req, res) => {
+    SURL.findOne({short: req.params.short}, (err, doc) => {
+        if(err){
+            res.json({result : -1});
+            return console.log(err);
+        }
+        if(doc !== null){
+            res.json({result : 1, url : doc.url});
+        } else {
+            res.json({result : 0});
+        }
+    });
 });
+
+
+app.post('/surl/add', (req, res) => {
+    let short = req.body.short;
+    let url = req.body.url;
+    let author = req.body.author;
+    let surl = new SURL({
+        short: short,
+        url: url,
+        author: author
+    });
+    SURL.findOne({short: short}, (err, doc) => {
+        if(err){
+            res.json({result : -1});
+            return console.log(err);
+        }
+        if(doc === null){
+            surl.save((err, i) => {
+                if(err){
+                    res.json({result: -1});
+                    return console.error(err);
+                }
+                res.json({result: 1});
+            });
+        } else res.json({result: 0});
+    });
+});
+
+app.put('/surl/edit', (req, res) => {
+    let short = req.body.short;
+    let url = req.body.url;
+    let author = req.body.author;
+    let _id = req.body._id;
+    let surl = new SURL({
+        short: short,
+        url: url,
+        author: author,
+        _id: _id
+    });
+    SURL.findOne({short: short}, (err, doc) => {
+        if(err){
+            res.json({result: -1});
+            return console.error(err);
+        }
+        if(doc === null){
+            SURL.findOneAndUpdate({_id: _id}, surl,{new: true, useFindAndModify: false},(err, doc) => {
+                if(err){
+                    res.json({result: -1});
+                    return console.error(err);
+                }
+                if(doc === null) res.json({result: 2});
+                else res.json({result: 1});
+            });
+        } else res.json({result: 0});
+    });
+
+});
+
+app.post('/surl/get', (req, res) => {
+    SURL.find({author: req.body.author}, (err, doc) => {
+        if(err){
+            res.json({result : -1});
+            return console.log(err);
+        }
+        res.json({result : 1, list : doc});
+    });
+});
+
+app.delete('/surl/delete/:id', (req, res) => {
+    SURL.findOneAndDelete({_id: req.params.id}, {}, (err, doc) => {
+        if(err){
+            res.json({result: -1});
+            return console.error(err);
+        }
+        if(doc === null) res.json({result: 2});
+        else res.json({result: 1});
+    });
+});
+
+
 
 app.post('/login', (req, res) => {
     let id = req.body.id;
     let pw = req.body.pw;
     User.findOne({id: id, pw: CryptoJS.MD5(pw)+""}, (err, doc) => {
         if(err){
-            console.log(err);
             res.json({result : -1});
-            return;
+            return console.log(err);
         }
         if(doc !== null){
             //Authentication is too hard for me
@@ -83,22 +166,19 @@ app.post('/signup', (req, res) => {
     });
 
     User.findOne({id: id}, (err, doc) => {
-        if(err){
-            console.log(err);
-            res.json({result : -1});
-            return console.error(err);
+        if (err) {
+            res.json({result: -1});
+            return console.log(err);
         }
-        if(doc === null){
-            user.save((err, user) => {
-                if(err){
+        if (doc === null) {
+            user.save((err, i) => {
+                if (err) {
                     res.json({result: -1});
                     return console.error(err);
                 }
-
                 res.json({result: 1});
             });
-        }
-        else res.json({result: 0});
+        } else res.json({result: 0});
     });
 
 });
