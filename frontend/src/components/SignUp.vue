@@ -1,13 +1,14 @@
 <template>
-    <div class="sign-up">
+    <div class="sign-up" @keyup.enter="signUp">
         <h3>회원가입</h3>
         <input type="text" v-model="email" placeholder="email"><br>
         <input type="password" v-model="password" placeholder="password"><br>
         <input type="password" v-model="password_ckeck" placeholder="re-enter password"><br>
-        <button @click="signUp()">가입하기</button>
+        <button @click="signUp" >가입하기</button>
         <br>
-        <button @click="gotoLogin()" >Go to Login</button>
+        <button @click="gotoLogin" >Go to Login</button>
     </div>
+
 </template>
 
 <script>
@@ -24,7 +25,7 @@
         },
         methods:{
             gotoLogin(){
-                this.$emit('input', 'p/login');
+                this.$emit('set-page', 'p/login');
             },
             signUp(){
                 const regex_pw = /^[A-Za-z0-9!@#$%^&+=]{8,}$/;
@@ -41,7 +42,7 @@
                     alert("비밀번호가 다릅니다. 다시 확인해 주세요.");
                     this.password = '';
                     this.password_ckeck = '';
-                }else {
+                } else {
                     axios.post('http://localhost:5000/signup', {id: this.email, pw: this.password}).then(result => {
                         let code =result.data.result;
                         if (code === 1) {

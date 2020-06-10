@@ -23,7 +23,14 @@ const userSchema = new Schema({
     id: String,
     pw: String
 });
+const urlSchema = new Schema({
+    shortened: String,
+    url: String,
+    author: String,
+});
+
 const User = mongoose.model('user', userSchema);
+const SURL = mongoose.model('surl', userSchema);
 
 
 
@@ -41,11 +48,29 @@ app.get('/', (req, res) => {
 });
 
 //TODO : 데이터베이스 접근, id값에 따른 주소 검색, redirect
-app.get('/:id', (req, res) => {
-    res.redirect(getURLFromCode(req.params.id));
+app.get('/surl/:id', (req, res) => {
+    //res.send(getURLFromCode(req.params.id));
+/*    setTimeout(() => {
+        res.json({result:1, url:"https://naver.com"});
+    }, 2000);*/
 });
 
 app.post('/login', (req, res) => {
+    let id = req.body.id;
+    let pw = req.body.pw;
+    User.findOne({id: id, pw: CryptoJS.MD5(pw)+""}, (err, doc) => {
+        if(err){
+            console.log(err);
+            res.json({result : -1});
+            return;
+        }
+        if(doc !== null){
+            //Authentication is too hard for me
+            res.json({result: 1, id: id, nickname: id.split("@")[0]});
+        } else{
+            res.json({result: 0});
+        }
+    });
 
 });
 
@@ -58,6 +83,11 @@ app.post('/signup', (req, res) => {
     });
 
     User.findOne({id: id}, (err, doc) => {
+        if(err){
+            console.log(err);
+            res.json({result : -1});
+            return console.error(err);
+        }
         if(doc === null){
             user.save((err, user) => {
                 if(err){
@@ -70,11 +100,6 @@ app.post('/signup', (req, res) => {
         }
         else res.json({result: 0});
     });
-
-
-
-
-
 
 });
 
