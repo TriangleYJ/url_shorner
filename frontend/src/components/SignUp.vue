@@ -1,9 +1,15 @@
 <template>
     <div class="sign-up" @keyup.enter="signUp">
         <h3>회원가입</h3>
-        <input type="text" v-model="email" placeholder="email"><br>
-        <input type="password" v-model="password" placeholder="password"><br>
-        <input type="password" v-model="password_ckeck" placeholder="re-enter password"><br>
+        <label>
+            <input type="text" v-model="email" placeholder="email">
+        </label><br>
+        <label>
+            <input type="password" v-model="password" placeholder="password">
+        </label><br>
+        <label>
+            <input type="password" v-model="password_ckeck" placeholder="re-enter password">
+        </label><br>
         <button @click="signUp" >가입하기</button>
         <br>
         <button @click="gotoLogin" >Go to Login</button>
@@ -50,10 +56,7 @@
                             this.gotoLogin();
                         } else if(code === 0) {
                             alert("이미 존재하는 이메일입니다.");
-                        } else {
-                            alert(`오류가 발생했습니다. 관리자에게 문의해 주십시오. 오류 코드 : ${code} | ${result.status}`);
                         }
-
                     });
                 }
             }

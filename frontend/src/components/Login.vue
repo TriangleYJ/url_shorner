@@ -1,8 +1,12 @@
 <template>
     <div class="login" @keyup.enter="login(email, password)">
         <h3>Login</h3>
-        <input type="text" v-model="email" placeholder="email"/> <br>
-        <input type="password" v-model="password" placeholder="password"/> <br>
+        <label>
+            <input type="text" v-model="email" placeholder="email"/>
+        </label> <br>
+        <label>
+            <input type="password" v-model="password" placeholder="password"/>
+        </label> <br>
         <button @click="login(email, password)" >로그인</button>
         <p>If you don't have an account, please register first.</p>
         <button @click="gotoSignUp">Go to SignUp</button>
@@ -23,36 +27,20 @@
             gotoSignUp(){
                 this.$emit('set-page', 'p/signup');
             },
+            gotoMain(){
+                this.$emit('set-page', 'p/main');
+            },
             login(email, password){
-                /*axios.post('http://localhost:5000/login', {id: this.email, pw: this.password}).then(result => {
-                    let code =result.data.result;
-                    if (code === 1) {
-                        alert(`성공적으로 로그인 되었습니다. ${result.data.nickname}님 환영합니다!`);
-                        this.$emit('set-page', 'p/');
-                    } else if(code === 0) {
-                        alert("이메일 혹은 비밀번호를 다시 확인해 주십시오.");
-                        this.email='';
-                        this.password='';
-                    } else {
-                        alert(`오류가 발생했습니다. 관리자에게 문의해 주십시오. 오류 코드 : ${code} | ${result.status}`);
-                    }
-
-                });*/
                 this.$store.dispatch('LOGIN', {email, password})
                     .then( result => {
-                        if(result === 1) this.redirect();
+                        if(result === 1) this.gotoMain();
                         else if(result === 0){
                             alert("Wrong ID or password. please check again.");
                             this.email='';
                             this.password='';
-                        } else {
-                            alert(`오류가 발생했습니다. 관리자에게 문의해 주십시오. 오류 코드 : ${result} | 0`);
                         }
                     })
             },
-            redirect(){
-                this.$emit('set-page', 'p/main');
-            }
         },
     }
 </script>

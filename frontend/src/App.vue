@@ -11,7 +11,7 @@
     components: {
       'Login': () => import('./components/Login'),
       'SignUp': () => import('./components/SignUp'),
-      '404': () => import('./components/404'),
+      'Page404': () => import('./components/Page404'),
       'Main': () => import('./components/Main'),
     },
     data: function () {
@@ -35,7 +35,7 @@
           case 'p/main':
             return 'Main';
           default:
-            return '404'; //Nopage
+            return 'Page404'; //Nopage
         }
       }
     },
@@ -49,9 +49,6 @@
           if(code === 1) window.location.href = result.data.url;
           else if(code === 0){
             alert("해당 주소는 존재하지 않습니다! 메인 페이지로 이동합니다.");
-            window.location.href = "/";
-          } else {
-            alert(`오류가 발생했습니다. 관리자에게 문의해 주십시오. 오류 코드 : ${result.data.code} | ${result.status}`);
             window.location.href = "/";
           }
         });

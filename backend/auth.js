@@ -13,21 +13,21 @@ const auth = {
             const {authorization} = req.headers;
             if (!authorization) {
                 res.status(401);
-                throw Error('No Authorization headers')
+                throw Error('No Authorization headers');
             }
 
             try {
-                req.user = this.verify(authorization)
+                req.user = this.verify(authorization);
             } catch (e) {
                 res.status(401);
-                throw e
+                throw e;
             }
 
-            next()
+            next();
         }
     },
     verify (token) {
-        return jwt.verify(token.replace(/^Bearer\s/, ''), secret)
+        return jwt.verify(token.replace(/^Bearer\s/, ''), secret);
     }
 };
 

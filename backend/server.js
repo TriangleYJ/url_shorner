@@ -1,13 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
 const mongoose = require('mongoose');
 const cors = require('cors');
 const CryptoJS = require('crypto-js');
 const auth = require('./auth');
 
+const app = express();
 const Schema = mongoose.Schema;
-
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -40,13 +39,6 @@ const SURL = mongoose.model('surl', urlSchema);
 const Login = mongoose.model('login', loginSchema);
 
 
-
-
-
-
-
-
-
 app.get('/', (req, res) => {
     res.send('Hello world!');
 });
@@ -55,7 +47,7 @@ app.get('/', (req, res) => {
 app.get('/surl/:short', (req, res) => {
     SURL.findOne({short: req.params.short}, (err, doc) => {
         if(err){
-            res.json({result : -1});
+            res.status(500);
             return console.log(err);
         }
         if(doc !== null){
@@ -78,11 +70,11 @@ app.post('/surl/add', (req, res) => {
     });
     SURL.findOne({short: short}, (err, doc) => {
         if(err){
-            res.json({result : -1});
+            res.status(500);
             return console.log(err);
         }
         if(doc === null){
-            surl.save((err, i) => {
+            surl.save((err) => {
                 if(err){
                     res.json({result: -1});
                     return console.error(err);
@@ -106,14 +98,14 @@ app.put('/surl/edit', (req, res) => {
     });
     SURL.findOne({short: short}, (err, doc) => {
         if(err){
-            res.json({result: -1});
-            return console.error(err);
+            res.status(500);
+            return console.log(err);
         }
         if(doc === null){
             SURL.findOneAndUpdate({_id: _id}, surl,{new: true, useFindAndModify: false},(err, doc) => {
                 if(err){
-                    res.json({result: -1});
-                    return console.error(err);
+                    res.status(500);
+                    return console.log(err);
                 }
                 if(doc === null) res.json({result: 2});
                 else res.json({result: 1});
@@ -126,7 +118,7 @@ app.put('/surl/edit', (req, res) => {
 app.post('/surl/get', (req, res) => {
     SURL.find({author: req.body.author}, (err, doc) => {
         if(err){
-            res.json({result : -1});
+            res.status(500);
             return console.log(err);
         }
         res.json({result : 1, list : doc});
@@ -136,8 +128,8 @@ app.post('/surl/get', (req, res) => {
 app.delete('/surl/delete/:id', (req, res) => {
     SURL.findOneAndDelete({_id: req.params.id}, {}, (err, doc) => {
         if(err){
-            res.json({result: -1});
-            return console.error(err);
+            res.status(500);
+            return console.log(err);
         }
         if(doc === null) res.json({result: 2});
         else res.json({result: 1});
@@ -151,7 +143,7 @@ app.post('/login', (req, res) => {
     let pw = CryptoJS.MD5(req.body.pw).toString();
     User.findOne({id: id, pw: pw}, (err, doc) => {
         if(err){
-            res.json({result : -1});
+            res.status(500);
             return console.log(err);
         }
         if(doc !== null){
@@ -159,15 +151,14 @@ app.post('/login', (req, res) => {
                 id: id,
                 createAt: new Date
             });
-            login.save((err, i) => {
+            login.save((err) => {
                 if(err){
-                    res.json({result : -1});
+                    res.status(500);
                     return console.log(err);
                 }
                 const accessToken = auth.signToken(id);
                 res.json({token : accessToken, result : 1});
             });
-            //res.json({result: 1, id: id, nickname: id.split("@")[0]});
         } else{
             res.json({result : 0});
         }
@@ -180,7 +171,6 @@ app.get('/main/check', (req, res) => {
     try {
         user = auth.verify(req.headers.authorization);
     } catch(e){}
-    console.log(user);
 
     if(!user){
         res.json({result: 0}); // Login first
@@ -191,8 +181,8 @@ app.get('/main/check', (req, res) => {
 
 app.get('/main', auth.ensureAuth(), (req, res) => {
     Login.findOne({id: req.user.id}, (err, doc) => {
-        if (err) {
-            res.json({result: -1});
+        if(err){
+            res.status(500);
             return console.log(err);
         }
         res.json({result : 1, logger: doc});
@@ -208,15 +198,15 @@ app.post('/signup', (req, res) => {
     });
 
     User.findOne({id: id}, (err, doc) => {
-        if (err) {
-            res.json({result: -1});
+        if(err){
+            res.status(500);
             return console.log(err);
         }
         if (doc === null) {
-            user.save((err, i) => {
-                if (err) {
-                    res.json({result: -1});
-                    return console.error(err);
+            user.save((err) => {
+                if(err){
+                    res.status(500);
+                    return console.log(err);
                 }
                 res.json({result: 1});
             });

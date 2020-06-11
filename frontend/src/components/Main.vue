@@ -5,9 +5,14 @@
         <br>
         <br>
         <div>
-            <input type="text" v-model="url" placeholder="the original link"><br>
+            <label>
+                <input type="text" v-model="url" placeholder="the original link">
+            </label><br>
             <p> ↓ </p>
-            <span>{{cur_domain}}</span><input type="text" v-model="short" placeholder="a short text what you what"><br>
+            <span>{{cur_domain}}</span>
+            <label>
+                <input type="text" v-model="short" placeholder="a short text what you what">
+            </label><br>
         </div>
         <button @click="putSURL">{{cur_id === '' ? "Enroll" : "Edit"}}</button>
         <button @click="editCancel" v-if="cur_id !== ''" >Cancel</button>
@@ -41,6 +46,9 @@
             };
         },
         methods:{
+            gotoLogin(){
+                this.$emit('set-page', 'p/login');
+            },
             putSURL(){
                 let url_reg = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,})/;
                 let short_reg = /^[A-Za-z0-9+]*$/;
@@ -66,8 +74,6 @@
                         } else if(code === 0){
                             alert("Shortened text already exists. Please try another shortened text.");
                             this.short='';
-                        } else {
-                            alert(`오류가 발생했습니다. 관리자에게 문의해 주십시오. 오류 코드 : ${code} | ${result.status}`);
                         }
                     });
                 } else {
@@ -87,8 +93,6 @@
                         } else if(code === 0){
                             alert("Shortened text already exists. Please try another shortened text.");
                             this.short='';
-                        } else {
-                            alert(`오류가 발생했습니다. 관리자에게 문의해 주십시오. 오류 코드 : ${code} | ${result.status}`);
                         }
                     });
                 }
@@ -114,8 +118,6 @@
                                 this.reloadAll();
                             } else if (code === 2) {
                                 alert("Delete failed! Try again please.");
-                            } else {
-                                alert(`오류가 발생했습니다. 관리자에게 문의해 주십시오. 오류 코드 : ${code} | ${result.status}`);
                             }
                         }
                     });
@@ -126,8 +128,6 @@
                     let code =result.data.result;
                     if(code === 1) {
                         this.my_surls = result.data.list;
-                    } else {
-                        alert(`오류가 발생했습니다. 관리자에게 문의해 주십시오. 오류 코드 : ${code} | ${result.status}`);
                     }
                 });
             },
@@ -139,18 +139,15 @@
                 this.getMySURLs();
             },
             logOut(){
-                this.$store.dispatch('LOGOUT').then(() => {
-                    this.$emit('set-page', 'p/login');
-                });
+                this.$store.dispatch('LOGOUT').then(() => this.gotoLogin());
             }
         },
         created() {
             axios.get('http://localhost:5000/main/check')
                 .then(result => {
                     let code = result.data.result;
-                    if(code !== 1){
-                        this.$emit('set-page', 'p/login');
-                    } else {
+                    if(code !== 1) this.gotoLogin();
+                    else {
                         axios.get('http://localhost:5000/main')
                             .then(result => {
                                 let code = result.data.result;
@@ -158,15 +155,9 @@
                                     this.email = result.data.logger.id;
                                     this.getMySURLs();
                                 }
-                            }).catch(error => {
-                            alert("An error occured!\n" + error);
-                        });
+                            })
                     }
-                }).catch(error => {
-                    alert("An error occured!\n" + error);
-                });
-
-
+                })
         }
 
     }
