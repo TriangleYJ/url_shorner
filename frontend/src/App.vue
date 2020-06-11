@@ -11,7 +11,7 @@
     components: {
       'Login': () => import('./components/Login'),
       'SignUp': () => import('./components/SignUp'),
-      'HelloWorld': () => import('./components/HelloWorld'),
+      '404': () => import('./components/404'),
       'Main': () => import('./components/Main'),
     },
     data: function () {
@@ -28,8 +28,6 @@
     computed: {
       whichComp() {
         switch (this.page) {
-          case 'p/':
-            return 'HelloWorld';
           case 'p/login':
             return 'Login';
           case 'p/signup':
@@ -37,12 +35,13 @@
           case 'p/main':
             return 'Main';
           default:
-            return 'HelloWorld'; //Nopage
+            return '404'; //Nopage
         }
       }
     },
     created() {
       let cur_route = window.location.pathname;
+      //Redirect part
       if(cur_route !== "/"){
         window.document.body.innerHTML = "현재 접속 중입니다.. 잠시만 기다려 주세요.";
         axios.get('http://localhost:5000/surl' + cur_route).then(result => {
