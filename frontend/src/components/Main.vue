@@ -1,6 +1,9 @@
 <template>
-    <div>
+    <div @keyup.enter="putSURL">
         <h1>Welcome to Shortner!</h1>
+        <span>{{email}}</span><button @click="logOut">Log out</button>
+        <br>
+        <br>
         <div>
             <input type="text" v-model="url" placeholder="the original link"><br>
             <p> ↓ </p>
@@ -32,7 +35,7 @@
                 short: '',
                 url: '',
                 cur_id : '', // '': add, not blank: edit
-                email: 'asdf@asdf.com', // temp
+                email: '',
                 cur_domain: 'localhost:8080/',
                 my_surls: []
             };
@@ -134,10 +137,36 @@
                 this.cur_id = '';
                 this.my_surls = [];
                 this.getMySURLs();
+            },
+            logOut(){
+                this.$store.dispatch('LOGOUT').then(() => {
+                    this.$emit('set-page', 'p/login');
+                });
             }
         },
         created() {
-            this.getMySURLs();
+            axios.get('http://localhost:5000/main/check')
+                .then(result => {
+                    let code = result.data.result;
+                    if(code !== 1){
+                        this.$emit('set-page', 'p/login');
+                    } else {
+                        axios.get('http://localhost:5000/main')
+                            .then(result => {
+                                let code = result.data.result;
+                                if (code === 1) {
+                                    this.email = result.data.logger.id;
+                                    this.getMySURLs();
+                                }
+                            }).catch(error => {
+                            alert("An error occured!\n" + error);
+                        });
+                    }
+                }).catch(error => {
+                    alert("An error occured!\n" + error);
+                });
+
+
         }
 
     }

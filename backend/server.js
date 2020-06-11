@@ -4,8 +4,10 @@ const app = express();
 const mongoose = require('mongoose');
 const cors = require('cors');
 const CryptoJS = require('crypto-js');
+const auth = require('./auth');
 
 const Schema = mongoose.Schema;
+
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -28,9 +30,14 @@ const urlSchema = new Schema({
     url: String,
     author: String,
 });
+const loginSchema = new Schema({
+   id: String,
+   createAt: Date
+});
 
 const User = mongoose.model('user', userSchema);
 const SURL = mongoose.model('surl', urlSchema);
+const Login = mongoose.model('login', loginSchema);
 
 
 
@@ -141,20 +148,55 @@ app.delete('/surl/delete/:id', (req, res) => {
 
 app.post('/login', (req, res) => {
     let id = req.body.id;
-    let pw = req.body.pw;
-    User.findOne({id: id, pw: CryptoJS.MD5(pw)+""}, (err, doc) => {
+    let pw = CryptoJS.MD5(req.body.pw).toString();
+    User.findOne({id: id, pw: pw}, (err, doc) => {
         if(err){
             res.json({result : -1});
             return console.log(err);
         }
         if(doc !== null){
-            //Authentication is too hard for me
-            res.json({result: 1, id: id, nickname: id.split("@")[0]});
+            let login = new Login({
+                id: id,
+                createAt: new Date
+            });
+            login.save((err, i) => {
+                if(err){
+                    res.json({result : -1});
+                    return console.log(err);
+                }
+                const accessToken = auth.signToken(id);
+                res.json({token : accessToken, result : 1});
+            });
+            //res.json({result: 1, id: id, nickname: id.split("@")[0]});
         } else{
-            res.json({result: 0});
+            res.json({result : 0});
         }
     });
 
+});
+
+app.get('/main/check', (req, res) => {
+    let user;
+    try {
+        user = auth.verify(req.headers.authorization);
+    } catch(e){}
+    console.log(user);
+
+    if(!user){
+        res.json({result: 0}); // Login first
+    }else{
+        res.json({result: 1}); // Go to main
+    }
+});
+
+app.get('/main', auth.ensureAuth(), (req, res) => {
+    Login.findOne({id: req.user.id}, (err, doc) => {
+        if (err) {
+            res.json({result: -1});
+            return console.log(err);
+        }
+        res.json({result : 1, logger: doc});
+    });
 });
 
 app.post('/signup', (req, res) => {
