@@ -1,6 +1,6 @@
 <template>
     <div class="sign-up" @keyup.enter="signUp">
-        <h3>회원가입</h3>
+        <h3>Sign Up</h3>
         <label>
             <input type="text" v-model="email" placeholder="email">
         </label><br>
@@ -10,7 +10,7 @@
         <label>
             <input type="password" v-model="password_ckeck" placeholder="re-enter password">
         </label><br>
-        <button @click="signUp" >가입하기</button>
+        <button @click="signUp" >Register</button>
         <br>
         <button @click="gotoLogin" >Go to Login</button>
     </div>
@@ -38,24 +38,24 @@
                 const regex_email = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
 
                 if(this.email.match(regex_email) == null || this.password.match(regex_pw) == null){
-                    alert("올바른 이메일 또는 패스워드(최소 8자, 영문+숫자)를 입력해 주십시오.");
+                    alert("Please enter the correct email or password (at least 8 length, english and number only).");
                     if(this.email.match(regex_email) == null) this.email = '';
                     if(this.password.match(regex_pw) == null){
                         this.password = '';
                         this.password_ckeck = '';
                     }
                 } else if(this.password !== this.password_ckeck){
-                    alert("비밀번호가 다릅니다. 다시 확인해 주세요.");
+                    alert("password is not correct! Please check again.");
                     this.password = '';
                     this.password_ckeck = '';
                 } else {
                     axios.post('http://localhost:5000/signup', {id: this.email, pw: this.password}).then(result => {
                         let code =result.data.result;
                         if (code === 1) {
-                            alert("성공적으로 회원가입이 완료되었습니다. 다시 로그인해주세요,");
+                            alert("Successively registered. Please login again.");
                             this.gotoLogin();
                         } else if(code === 0) {
-                            alert("이미 존재하는 이메일입니다.");
+                            alert("The email already exists! Please try another email or login with the email.");
                         }
                     });
                 }

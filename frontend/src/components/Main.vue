@@ -53,7 +53,7 @@
                 let url_reg = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,})/;
                 let short_reg = /^[A-Za-z0-9+]*$/;
                 if(this.short.match(short_reg) == null){
-                    alert("Short text is incorrect : it has only alphabets and numbers.");
+                    alert("Short text is incorrect : it must contains only alphabets and numbers.");
                     this.short='';
                 } else if(this.url.match(url_reg) == null){
                     alert("Link is incorrect : it must contains 'http://' or 'https://'. Just copy your address bar.");

@@ -7,7 +7,7 @@
         <label>
             <input type="password" v-model="password" placeholder="password"/>
         </label> <br>
-        <button @click="login(email, password)" >로그인</button>
+        <button @click="login(email, password)" >Login</button>
         <p>If you don't have an account, please register first.</p>
         <button @click="gotoSignUp">Go to SignUp</button>
     </div>
