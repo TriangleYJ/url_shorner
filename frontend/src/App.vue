@@ -6,6 +6,17 @@
 
 <script>
   import axios from "axios";
+  import Vue from 'vue'
+  import {MdCard, MdField, MdButton} from 'vue-material/dist/components'
+  import 'vue-material/dist/vue-material.min.css'
+  import 'vue-material/dist/theme/default.css'
+
+
+  Vue.use(MdCard);
+  Vue.use(MdField);
+  Vue.use(MdButton);
+
+
   export default {
     name: 'App',
     components: {
@@ -57,7 +68,7 @@
   };
 </script>
 
-<style>
+<!--<style>
   #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -66,4 +77,4 @@
     color: #2c3e50;
     margin-top: 60px;
   }
-</style>
+</style>-->
