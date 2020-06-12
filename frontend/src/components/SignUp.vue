@@ -25,7 +25,7 @@
                         <md-input type="password" v-model="password_check"/>
                         <span class="md-error" v-if="!this.$v.password_check.sameAsPassword">Password must be identical.</span>
                     </md-field>
-                    <md-card-actions class = "md-bottom-center">
+                    <md-card-actions>
                         <md-button type="submit" class="md-primary">Register</md-button>
                     </md-card-actions>
                 </form>

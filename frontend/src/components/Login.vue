@@ -1,15 +1,31 @@
 <template>
-    <div class="login" @keyup.enter="login(email, password)">
-        <h3>Login</h3>
-        <label>
-            <input type="text" v-model="email" placeholder="email"/>
-        </label> <br>
-        <label>
-            <input type="password" v-model="password" placeholder="password"/>
-        </label> <br>
-        <button @click="login(email, password)" >Login</button>
+    <div @keyup.enter="login(email, password)" class="container">
+        <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
+        <md-card>
+            <md-card-header>
+                <div class="md-title">Login</div>
+            </md-card-header>
+            <md-card-content>
+                <form>
+                    <md-field>
+                        <label>Email</label>
+                        <md-input type="text" v-model="email" @click="wrong=false"/>
+                    </md-field>
+                    <md-field>
+                        <label>Password</label>
+                        <md-input type="password" v-model="password" @click="wrong=false"/>
+                    </md-field>
+                    <span class="md-stepper-error" v-if="wrong">Wrong ID or password. please check again.</span>
+                    <md-card-actions>
+                        <md-button @click="login(email, password)"  class="md-primary">Login</md-button>
+                    </md-card-actions>
+                </form>
+
+            </md-card-content>
+        </md-card>
+        <div class="mt-20"></div>
         <p>If you don't have an account, please register first.</p>
-        <button @click="gotoSignUp">Go to SignUp</button>
+        <md-button @click="gotoSignUp">Go to SignUp</md-button>
     </div>
 </template>
 
@@ -21,6 +37,7 @@
             return{
                 email:'',
                 password:'',
+                wrong: false
             }
         },
         methods:{
@@ -35,7 +52,7 @@
                     .then( result => {
                         if(result === 1) this.gotoMain();
                         else if(result === 0){
-                            alert("Wrong ID or password. please check again.");
+                            this.wrong = true;
                             this.email='';
                             this.password='';
                         }
@@ -45,28 +62,25 @@
     }
 </script>
 
-<style scoped>
-    .login{
-        margin-top:40px;
+<style lang="scss" scoped>
+    .md-card {
+        width: 360px;
+        margin: 4px;
+        display: inline-block;
+        vertical-align: top;
     }
-    input {
-        margin: 10px 0;
-        width: 20%;
-        padding: 15px;
+    .container{
+        text-align: center;
+        margin: 60px;
     }
-    button {
-        margin-top: 20px;
-        width: 10%;
-        cursor: pointer;
+    .mt-20{
+        margin-top: 20px
     }
-    p {
-        margin-top: 40px;
-        font-size: 12px;
+    p{
+        font-size: 13px;
     }
-    span{
-        display: block;
-        margin-top: 20px;
-        font-size: 15px;
+    .md-stepper-error{
+        color: red;
     }
 
 </style>
