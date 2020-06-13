@@ -1,5 +1,5 @@
 <template>
-    <div class="page-container" @keyup.enter="putSURL">
+    <div class="page-container" @keyup.enter="validateSRUL">
         <md-app md-waterfall md-mode="overlap">
             <md-app-toolbar class="md-primary md-large">
                 <div class="md-toolbar-row">
@@ -15,23 +15,29 @@
             </md-app-toolbar>
             <md-app-content>
                 <div>
-                    <h3>Shortend Link {{cur_id !== '' ? "Editor" : "Generator"}}</h3>
-                    <MdField>
+                    <h3>Shortened Link {{cur_id !== '' ? "Editor" : "Generator"}}</h3>
+                    <MdField :class="getValidationClass('url')">
                         <label>Original link</label>
                         <MdInput v-model="url" placeholder="https://docs.google.com/spreadsheets/d/1HdxeaV7_4_-3ZfRHFJ2LLoAyBV9h-OjR4b/view"/>
+                        <span class="md-error" v-if="!this.$v.url.required">Link is required.</span>
+                        <span class="md-error" v-else-if="!this.$v.url.regex_match">Invalid Link: Just copy your address bar.</span>
                     </MdField>
                     <MdIcon>arrow_downward</MdIcon>
                     <div>
                         <span>{{cur_domain}}</span>
                         <div class="new-code">
-                            <MdField >
+                            <MdField :class="getValidationClass('short')">
                                 <label>New code</label>
                                 <MdInput v-model="short" placeholder="hello"/>
+                                <span class="md-error" v-if="!this.$v.short.required">Code is required.</span>
+                                <span class="md-error" v-else-if="!this.$v.short.minLength">It must be longer than 4.</span>
+                                <span class="md-error" v-else-if="!this.$v.short.regex_match">Invalid code.</span>
+                                <span class="md-error" v-else-if="!this.$v.short.short_exist">Already exists!</span>
                             </MdField>
                         </div>
                     </div>
                     <div>
-                        <MdButton class="md-primary md-raised" @click="putSURL">{{cur_id === '' ? "Add" : "Edit"}}</MdButton>
+                        <MdButton class="md-primary md-raised" @click="validateSRUL">{{cur_id === '' ? "Add" : "Edit"}}</MdButton>
                         <MdButton class="md-accent md-raised" @click="editCancel" v-if="cur_id !== ''">Cancel</MdButton>
                     </div>
                 </div>
@@ -86,7 +92,7 @@
         display: inline-block;
     }
     .new-code{
-        width: 100px;
+        width: 150px;
         display: inline-block;
     }
 
@@ -108,9 +114,15 @@
 
 <script>
     import axios from 'axios'
+    import {validationMixin} from 'vuelidate'
+    import{
+        required,
+        minLength,
+    } from 'vuelidate/lib/validators'
 
     export default {
         name: "Main",
+        mixins: [validationMixin],
         data(){
             return {
                 short: '',
@@ -120,25 +132,44 @@
                 cur_domain: 'localhost:8080/',
                 my_surls: [],
                 showblank: false,
+                disallowed_code: ''
             };
+        },
+        validations: {
+            short:{
+                required,
+                minLength: minLength(4),
+                regex_match: value => value.match(/^[A-Za-z0-9+]*$/) !== null,
+                short_exist: (value, vm) => {
+                    if(vm.disallowed_code) return value !== vm.disallowed_code;
+                    return true;
+                }
+            },
+            url:{
+                required,
+                regex_match: value => value.match(/(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,})/) !== null
+            }
         },
         methods:{
             gotoLogin(){
                 this.$emit('set-page', 'p/login');
             },
+            getValidationClass (fieldName) {
+                const field = this.$v[fieldName];
+                if (field) {
+                    return {
+                        'md-invalid': field.$invalid && field.$dirty
+                    }
+                }
+            },
+            validateSRUL () {
+                this.$v.$touch();
+                if (!this.$v.$invalid) {
+                    this.putSURL();
+                }
+            },
             putSURL(){
-                let url_reg = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,})/;
-                let short_reg = /^[A-Za-z0-9+]*$/;
-                if(this.short.match(short_reg) == null){
-                    alert("Short text is incorrect : it must contains only alphabets and numbers.");
-                    this.short='';
-                } else if(this.url.match(url_reg) == null){
-                    alert("Link is incorrect : it must contains 'http://' or 'https://'. Just copy your address bar.");
-                    this.url = '';
-                } else if(this.short.length < 4){
-                    alert("Short text must be longer than 4.");
-                    this.short = '';
-                } else if(this.cur_id === ''){
+                if(this.cur_id === ''){
                     axios.post('http://localhost:5000/surl/add', {
                         short: this.short,
                         url: this.url,
@@ -149,8 +180,8 @@
                             alert("Shorten URL added successively.");
                             this.reloadAll();
                         } else if(code === 0){
-                            alert("Shortened text already exists. Please try another shortened text.");
-                            this.short='';
+                            this.disallowed_code = this.short;
+                            //alert("Shortened text already exists. Please try another shortened text.");
                         }
                     });
                 } else {
@@ -168,8 +199,9 @@
                             alert("Edit failed! Try again please.");
                             this.short='';
                         } else if(code === 0){
-                            alert("Shortened text already exists. Please try another shortened text.");
-                            this.short='';
+                            this.disallowed_code = this.short;
+                            /*alert("Shortened text already exists. Please try another shortened text.");
+                            this.short='';*/
                         }
                     });
                 }
@@ -210,11 +242,7 @@
                 });
             },
             reloadAll(){
-                this.short = '';
-                this.url = '';
-                this.cur_id = '';
-                this.my_surls = [];
-                this.getMySURLs();
+                window.location.reload();
             },
             logOut(){
                 this.$store.dispatch('LOGOUT').then(() => this.gotoLogin());
