@@ -7,13 +7,17 @@
 <script>
     import axios from "axios";
     import Vue from 'vue'
-    import {MdCard, MdField, MdButton} from 'vue-material/dist/components'
+    import {MdCard, MdField, MdButton, MdApp, MdToolbar, MdDivider, MdEmptyState, MdList} from 'vue-material/dist/components'
     import 'vue-material/dist/vue-material.min.css'
     import 'vue-material/dist/theme/default.css'
-
     Vue.use(MdCard);
     Vue.use(MdField);
     Vue.use(MdButton);
+    Vue.use(MdApp);
+    Vue.use(MdToolbar);
+    Vue.use(MdDivider);
+    Vue.use(MdEmptyState);
+    Vue.use(MdList);
 
 
     export default {
@@ -77,3 +81,6 @@
     margin-top: 60px;
   }
 </style>-->
+<style>
+    @import url("https://fonts.googleapis.com/css?family=Material+Icons");
+</style>

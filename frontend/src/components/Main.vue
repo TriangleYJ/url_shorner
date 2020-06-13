@@ -1,34 +1,110 @@
 <template>
-    <div @keyup.enter="putSURL">
-        <h1>Welcome to Shortner!</h1>
-        <span>{{email}}</span><button @click="logOut">Log out</button>
-        <br>
-        <br>
-        <div>
-            <label>
-                <input type="text" v-model="url" placeholder="the original link">
-            </label><br>
-            <p> ↓ </p>
-            <span>{{cur_domain}}</span>
-            <label>
-                <input type="text" v-model="short" placeholder="a short text what you what">
-            </label><br>
-        </div>
-        <button @click="putSURL">{{cur_id === '' ? "Enroll" : "Edit"}}</button>
-        <button @click="editCancel" v-if="cur_id !== ''" >Cancel</button>
-        <div>
-            <h3> Enrolled Links </h3>
-            <ul>
-                <li v-for="surl in my_surls" v-bind:key="surl.short">
-                    <span style="white-space: nowrap; display: inline-block; width:400px; text-overflow: ellipsis; overflow: hidden;">{{ surl.url }}</span><span> → <a :href="surl.short">{{cur_domain + surl.short}}</a></span>
-                    <button v-on:click="editSURL(surl.short, surl.url, surl._id)" style="margin-left: 2rem">Edit</button>
-                    <button v-on:click="deleteSURL(surl._id)">Delete</button>
-                </li>
-            </ul>
-        </div>
+    <div class="page-container" @keyup.enter="putSURL">
+        <md-app md-waterfall md-mode="overlap">
+            <md-app-toolbar class="md-primary md-large">
+                <div class="md-toolbar-row">
+                    <span class="md-title">My Shortened Links</span>
+                    <div class="md-toolbar-section-end">
+                        <span class="md-right">{{email}}</span>
+                        <md-button @click="logOut" class="md-icon-button">
+                            <md-icon>exit_to_app</md-icon>
+                        </md-button>
+                    </div>
 
+                </div>
+            </md-app-toolbar>
+            <md-app-content>
+                <div>
+                    <h3>Shortend Link {{cur_id !== '' ? "Editor" : "Generator"}}</h3>
+                    <MdField>
+                        <label>Original link</label>
+                        <MdInput v-model="url" placeholder="https://docs.google.com/spreadsheets/d/1HdxeaV7_4_-3ZfRHFJ2LLoAyBV9h-OjR4b/view"/>
+                    </MdField>
+                    <MdIcon>arrow_downward</MdIcon>
+                    <div>
+                        <span>{{cur_domain}}</span>
+                        <div class="new-code">
+                            <MdField >
+                                <label>New code</label>
+                                <MdInput v-model="short" placeholder="hello"/>
+                            </MdField>
+                        </div>
+                    </div>
+                    <div>
+                        <MdButton class="md-primary md-raised" @click="putSURL">{{cur_id === '' ? "Add" : "Edit"}}</MdButton>
+                        <MdButton class="md-accent md-raised" @click="editCancel" v-if="cur_id !== ''">Cancel</MdButton>
+                    </div>
+                </div>
+                <div class="mt-20"></div>
+                <MdDivider/>
+                <div>
+                    <md-empty-state v-if="showblank"
+                            md-icon="link"
+                            md-label="Create your first Shortened Link!"
+                            md-description="Creating shortened link, you'll be able to access and memorize your link more easily."
+                            class="md-primary">
+                    </md-empty-state>
+                    <md-list v-for="surl in my_surls" v-bind:key="surl.short" class="md-double-line">
+                        <md-list-item v-if="!showblank">
+                            <div class="md-list-item-text">
+                                <a :href="surl.short">{{cur_domain + surl.short}}</a>
+                                <span class = "md-list-item-text long-url">{{surl.url}}</span>
+                            </div>
+                            <md-button class="md-icon-button md-list-action" v-on:click="editSURL(surl.short, surl.url, surl._id)">
+                                <md-icon>edit</md-icon>
+                            </md-button>
+                            <md-button class="md-icon-button md-list-action" v-on:click="deleteSURL(surl._id)">
+                                <md-icon>delete</md-icon>
+                            </md-button>
+                        </md-list-item>
+                    </md-list>
+                </div>
+            </md-app-content>
+        </md-app>
     </div>
 </template>
+
+<style lang="scss" scoped>
+    .md-app {
+        max-height: 100vh;
+        border: 1px solid rgba(#000, .12);
+        text-align: center;
+
+    }
+
+    .md-app-content{
+        max-width: 700px;
+        width: 70%;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .toolbar-content{
+        padding: 20px;
+        max-width: 600px;
+        margin-bottom: 40px;
+        display: inline-block;
+    }
+    .new-code{
+        width: 100px;
+        display: inline-block;
+    }
+
+    .mt-20{
+        margin-top: 20px;
+    }
+
+    .long-url{
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow:ellipsis;
+        display: inline-block;
+        max-width: 100%;
+    }
+
+
+
+</style>
 
 <script>
     import axios from 'axios'
@@ -42,7 +118,8 @@
                 cur_id : '', // '': add, not blank: edit
                 email: '',
                 cur_domain: 'localhost:8080/',
-                my_surls: []
+                my_surls: [],
+                showblank: false,
             };
         },
         methods:{
@@ -127,6 +204,7 @@
                 axios.post('http://localhost:5000/surl/get', {author: this.email}).then(result => {
                     let code =result.data.result;
                     if(code === 1) {
+                        this.showblank = result.data.list.length === 0;
                         this.my_surls = result.data.list;
                     }
                 });
@@ -140,7 +218,7 @@
             },
             logOut(){
                 this.$store.dispatch('LOGOUT').then(() => this.gotoLogin());
-            }
+            },
         },
         created() {
             axios.get('http://localhost:5000/main/check')
@@ -157,12 +235,9 @@
                                 }
                             })
                     }
-                })
-        }
+                });
+
+        },
 
     }
 </script>
-
-<style scoped>
-
-</style>

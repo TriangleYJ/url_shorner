@@ -15,7 +15,7 @@
                         <label>Password</label>
                         <md-input type="password" v-model="password" @click="wrong=false"/>
                     </md-field>
-                    <span class="md-stepper-error" v-if="wrong">Wrong ID or password. please check again.</span>
+                    <span class="error-text" v-if="wrong">Wrong ID or password. please check again.</span>
                     <md-card-actions>
                         <md-button @click="login(email, password)"  class="md-primary">Login</md-button>
                     </md-card-actions>
@@ -77,10 +77,11 @@
         margin-top: 20px
     }
     p{
-        font-size: 13px;
+        font-size: 14px;
     }
-    .md-stepper-error{
+    .error-text{
         color: red;
+        font-size: 12px;
     }
 
 </style>
