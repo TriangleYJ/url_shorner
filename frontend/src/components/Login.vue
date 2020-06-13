@@ -58,6 +58,9 @@
                         }
                     })
             },
+            sendMessage(message){
+                this.$emit('snack', message);
+            }
         },
     }
 </script>

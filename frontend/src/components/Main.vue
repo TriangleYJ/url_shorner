@@ -132,7 +132,7 @@
                 cur_domain: 'localhost:8080/',
                 my_surls: [],
                 showblank: false,
-                disallowed_code: ''
+                disallowed_code: '',
             };
         },
         validations: {
@@ -177,11 +177,10 @@
                     }).then(result => {
                         let code =result.data.result;
                         if(code === 1){
-                            alert("Shorten URL added successively.");
+                            this.sendMessage("Shorten URL added successively.");
                             this.reloadAll();
                         } else if(code === 0){
                             this.disallowed_code = this.short;
-                            //alert("Shortened text already exists. Please try another shortened text.");
                         }
                     });
                 } else {
@@ -193,15 +192,13 @@
                     }).then(result => {
                         let code = result.data.result;
                         if(code === 1){
-                            alert("Shorten URL edited successively.");
+                            this.sendMessage("Shorten URL edited successively.");
                             this.reloadAll();
                         } else if(code === 2){
-                            alert("Edit failed! Try again please.");
+                            this.sendMessage("Edit failed! Try again please.");
                             this.short='';
                         } else if(code === 0){
                             this.disallowed_code = this.short;
-                            /*alert("Shortened text already exists. Please try another shortened text.");
-                            this.short='';*/
                         }
                     });
                 }
@@ -223,10 +220,10 @@
                         if (code === 1) {
                             this.my_surls = result.data.list;
                             if (code === 1) {
-                                alert("Shorten URL deleted successively.");
                                 this.reloadAll();
+                                this.sendMessage("Shorten URL deleted successively.");
                             } else if (code === 2) {
-                                alert("Delete failed! Try again please.");
+                                this.sendMessage("Delete failed! Try again please.");
                             }
                         }
                     });
@@ -242,11 +239,21 @@
                 });
             },
             reloadAll(){
-                window.location.reload();
+                //window.location.reload();
+                this.short = '';
+                this.url = '';
+                this.cur_id = '';
+                this.my_surls = [];
+                this.disallowed_code = '';
+                this.getMySURLs();
+                this.$v.$reset();
             },
             logOut(){
                 this.$store.dispatch('LOGOUT').then(() => this.gotoLogin());
             },
+            sendMessage(message){
+                this.$emit('snack', message);
+            }
         },
         created() {
             axios.get('http://localhost:5000/main/check')

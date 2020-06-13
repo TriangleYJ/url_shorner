@@ -98,12 +98,15 @@
                 axios.post('http://localhost:5000/signup', {id: this.email, pw: this.password}).then(result => {
                     let code =result.data.result;
                     if (code === 1) {
-                        alert("Successively registered. Please login again.");
+                        this.sendMessage("Successively registered. Please login again.");
                         this.gotoLogin();
                     } else if(code === 0) {
                         this.disallowed_email = this.email;
                     }
                 });
+            },
+            sendMessage(message){
+                this.$emit('snack', message);
             }
         },
     }
@@ -125,30 +128,3 @@
     }
 
 </style>
-
-<!--
-<style scoped>
-    .sign-up{
-        margin-top:40px;
-    }
-    input {
-        margin: 10px 0;
-        width: 20%;
-        padding: 15px;
-    }
-    button {
-        margin-top: 20px;
-        width: 10%;
-        cursor: pointer;
-    }
-    p {
-        margin-top: 40px;
-        font-size: 12px;
-    }
-    span{
-        display: block;
-        margin-top: 20px;
-        font-size: 15px;
-    }
-
-</style>-->

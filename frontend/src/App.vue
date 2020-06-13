@@ -1,13 +1,17 @@
 <template>
     <div id="app">
-        <component :is="whichComp" @set-page="setPage"/>
+        <component :is="whichComp" @set-page="setPage" @snack="snack"/>
+
+        <md-snackbar :md-position="'left'" :md-duration="4000" :md-active.sync="showSnackbar" md-persistent>
+            <span>{{snackbarMessage}}</span>
+        </md-snackbar>
     </div>
 </template>
 
 <script>
     import axios from "axios";
     import Vue from 'vue'
-    import {MdCard, MdField, MdButton, MdApp, MdToolbar, MdDivider, MdEmptyState, MdList} from 'vue-material/dist/components'
+    import {MdCard, MdField, MdButton, MdApp, MdToolbar, MdDivider, MdEmptyState, MdList, MdSnackbar} from 'vue-material/dist/components'
     import 'vue-material/dist/vue-material.min.css'
     import 'vue-material/dist/theme/default.css'
     Vue.use(MdCard);
@@ -18,6 +22,7 @@
     Vue.use(MdDivider);
     Vue.use(MdEmptyState);
     Vue.use(MdList);
+    Vue.use(MdSnackbar);
 
 
     export default {
@@ -30,13 +35,18 @@
         },
         data: function () {
             return {
-                islogin: false,
-                page: 'p/main'
+                page: 'p/main',
+                showSnackbar: false,
+                snackbarMessage: ''
             }
         },
         methods: {
             setPage(new_page) {
                 this.page = new_page;
+            },
+            snack(message) {
+                this.snackbarMessage = message;
+                this.showSnackbar = true;
             }
         },
         computed: {
@@ -71,16 +81,7 @@
     };
 </script>
 
-<!--<style>
-  #app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-    margin-top: 60px;
-  }
-</style>-->
+
 <style>
     @import url("https://fonts.googleapis.com/css?family=Material+Icons");
 </style>
